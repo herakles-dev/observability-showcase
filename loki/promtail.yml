@@ -1,0 +1,73 @@
+# Promtail Configuration
+# Ships logs from Docker containers and system logs to Loki
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /positions/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Docker container logs (auto-discovers running containers)
+  - job_name: docker
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          __path__: /var/lib/docker/containers/**/*.log
+    pipeline_stages:
+      - docker: {}
+      - json:
+          expressions:
+            stream: stream
+            time: time
+      - labels:
+          stream:
+
+  # System logs
+  - job_name: syslog
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: syslog
+          __path__: /var/log/syslog
+
+  # Nginx access logs
+  - job_name: nginx
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          __path__: /var/log/nginx/access.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<remote_addr>\S+) - (?P<remote_user>\S+) \[(?P<time_local>.+)\] "(?P<method>\S+) (?P<path>\S+) (?P<protocol>\S+)" (?P<status>\d+) (?P<body_bytes>\d+) "(?P<referer>[^"]*)" "(?P<user_agent>[^"]*)"'
+      - labels:
+          method:
+          status:
+          path:
+
+  # Nginx error logs
+  - job_name: nginx-errors
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx-errors
+          __path__: /var/log/nginx/error.log
+
+  # Application logs (add your app log paths here)
+  # - job_name: my-app
+  #   static_configs:
+  #     - targets:
+  #         - localhost
+  #       labels:
+  #         job: my-app
+  #         __path__: /var/log/my-app/*.log

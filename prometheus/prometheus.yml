@@ -1,0 +1,44 @@
+# Prometheus Configuration
+# Adapt scrape targets to your services
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Example: Application metrics
+  # - job_name: "my-api"
+  #   static_configs:
+  #     - targets: ["my-api:8000"]
+  #   metrics_path: "/metrics"
+  #   scrape_interval: 30s
+
+  # Example: Node exporter (host metrics)
+  # - job_name: "node-exporter"
+  #   static_configs:
+  #     - targets: ["node-exporter:9100"]
+
+  # Example: cAdvisor (container metrics)
+  # - job_name: "cadvisor"
+  #   static_configs:
+  #     - targets: ["cadvisor:8080"]
+
+  # Example: PostgreSQL exporter
+  # - job_name: "postgres-exporter"
+  #   static_configs:
+  #     - targets: ["postgres-exporter:9187"]
+
+  # Example: Redis exporter
+  # - job_name: "redis-exporter"
+  #   static_configs:
+  #     - targets: ["redis-exporter:9121"]
+
+  # Example: OpenTelemetry Collector
+  # - job_name: "otel-collector"
+  #   static_configs:
+  #     - targets: ["otel-collector:2112"]

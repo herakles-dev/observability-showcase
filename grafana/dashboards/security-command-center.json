@@ -1,0 +1,182 @@
+{
+  "dashboard": {
+    "title": "Security Command Center",
+    "tags": ["security"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "refresh": "2m",
+    "uid": "security-command-center",
+    "time": { "from": "now-1h", "to": "now" },
+    "liveNow": false,
+    "panels": [
+      {
+        "id": 1,
+        "type": "text",
+        "gridPos": { "x": 0, "y": 0, "w": 24, "h": 2 },
+        "transparent": true,
+        "options": {
+          "mode": "html",
+          "content": "<div style=\"text-align:center;padding:8px 0\"><span style=\"font-size:26px;font-weight:600;letter-spacing:4px;color:#E02F44\">◈ SECURITY COMMAND CENTER ◈</span><div style=\"color:#777;font-size:10px;letter-spacing:2px;margin-top:2px\">THREATS • AUTH • BOTS • BANS</div></div>"
+        }
+      },
+      {
+        "id": 2, "type": "stat", "title": "Probes",
+        "description": "Malicious probe attempts (.env, .git, wp-*)",
+        "gridPos": { "x": 0, "y": 2, "w": 4, "h": 4 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [{ 
+          "expr": "sum(count_over_time({job=\"nginx\"} |~ \"\\\\.env|\\\\.git|wp-\" [1h]))", 
+          "refId": "A",
+          "instant": true,
+          "queryType": "instant"
+        }],
+        "fieldConfig": { 
+          "defaults": { 
+            "color": { "mode": "thresholds" }, 
+            "thresholds": { "steps": [{ "color": "#37872D", "value": null }, { "color": "#FADE2A", "value": 20 }, { "color": "#FF9830", "value": 50 }, { "color": "#C4162A", "value": 100 }] }, 
+            "noValue": "0",
+            "unit": "short"
+          } 
+        },
+        "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      },
+      {
+        "id": 3, "type": "stat", "title": "Auth Fails",
+        "description": "Authentication failures from Authelia",
+        "gridPos": { "x": 4, "y": 2, "w": 4, "h": 4 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [{ "expr": "sum(count_over_time({job=\"authelia\"} |= \"level=error\" [1h]))", "refId": "A", "instant": true, "queryType": "instant" }],
+        "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "#37872D", "value": null }, { "color": "#FF9830", "value": 10 }, { "color": "#C4162A", "value": 50 }] }, "noValue": "0" } },
+        "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      },
+      {
+        "id": 4, "type": "stat", "title": "Bans",
+        "description": "IPs banned by Fail2ban (24h)",
+        "gridPos": { "x": 8, "y": 2, "w": 4, "h": 4 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [{ "expr": "sum(count_over_time({job=\"fail2ban\"} |= \"Ban\" [24h]))", "refId": "A", "instant": true, "queryType": "instant" }],
+        "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "#73BF69", "value": null }, { "color": "#FADE2A", "value": 3 }, { "color": "#FF9830", "value": 10 }] }, "noValue": "0" } },
+        "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      },
+      {
+        "id": 5, "type": "stat", "title": "404s",
+        "description": "Not found errors",
+        "gridPos": { "x": 12, "y": 2, "w": 3, "h": 4 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [{ "expr": "sum(count_over_time({job=\"nginx\"} |= \" 404 \" [1h]))", "refId": "A", "instant": true, "queryType": "instant" }],
+        "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "#37872D", "value": null }, { "color": "#FF9830", "value": 30 }, { "color": "#C4162A", "value": 100 }] }, "noValue": "0" } },
+        "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      },
+      {
+        "id": 6, "type": "stat", "title": "403s",
+        "description": "Forbidden/blocked requests",
+        "gridPos": { "x": 15, "y": 2, "w": 3, "h": 4 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [{ "expr": "sum(count_over_time({job=\"nginx\"} |= \" 403 \" [1h]))", "refId": "A", "instant": true, "queryType": "instant" }],
+        "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "#37872D", "value": null }, { "color": "#FF9830", "value": 20 }, { "color": "#C4162A", "value": 50 }] }, "noValue": "0" } },
+        "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      },
+      {
+        "id": 7, "type": "stat", "title": "5xx",
+        "description": "Server errors",
+        "gridPos": { "x": 18, "y": 2, "w": 3, "h": 4 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [{ "expr": "sum(count_over_time({job=\"nginx\"} |~ \" 50[0-9] \" [1h]))", "refId": "A", "instant": true, "queryType": "instant" }],
+        "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "#37872D", "value": null }, { "color": "#FF9830", "value": 3 }, { "color": "#C4162A", "value": 10 }] }, "noValue": "0" } },
+        "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      },
+      {
+        "id": 8, "type": "stat", "title": "Requests",
+        "description": "Total requests (1h)",
+        "gridPos": { "x": 21, "y": 2, "w": 3, "h": 4 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [{ "expr": "sum(count_over_time({job=\"nginx\"} [1h]))", "refId": "A", "instant": true, "queryType": "instant" }],
+        "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "#3274D9", "value": null }] }, "noValue": "0" } },
+        "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      },
+      {
+        "id": 9, "type": "text", "gridPos": { "x": 0, "y": 6, "w": 24, "h": 1 }, "transparent": true,
+        "options": { "mode": "html", "content": "<div style=\"border-bottom:1px solid #333\"><span style=\"color:#777;font-size:10px;letter-spacing:2px\">◈ ATTACK VECTORS</span></div>" }
+      },
+      {
+        "id": 10, "type": "bargauge", "title": "Attack Types (1h)",
+        "gridPos": { "x": 0, "y": 7, "w": 8, "h": 6 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [
+          { "expr": "sum(count_over_time({job=\"nginx\"} |~ \"\\\\.env\" [1h]))", "legendFormat": ".env probes", "refId": "A", "instant": true, "queryType": "instant" },
+          { "expr": "sum(count_over_time({job=\"nginx\"} |~ \"\\\\.git\" [1h]))", "legendFormat": ".git probes", "refId": "B", "instant": true, "queryType": "instant" },
+          { "expr": "sum(count_over_time({job=\"nginx\"} |~ \"wp-admin|wp-login\" [1h]))", "legendFormat": "WordPress", "refId": "C", "instant": true, "queryType": "instant" },
+          { "expr": "sum(count_over_time({job=\"nginx\"} |~ \"phpmyadmin|pma\" [1h]))", "legendFormat": "phpMyAdmin", "refId": "D", "instant": true, "queryType": "instant" }
+        ],
+        "fieldConfig": { 
+          "defaults": { 
+            "color": { "mode": "palette-classic" },
+            "noValue": "0",
+            "thresholds": { "steps": [{ "color": "#37872D", "value": null }, { "color": "#FF9830", "value": 10 }, { "color": "#C4162A", "value": 50 }] }
+          }
+        },
+        "options": { "displayMode": "gradient", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"] }, "showUnfilled": true }
+      },
+      {
+        "id": 11, "type": "timeseries", "title": "Traffic by Status",
+        "gridPos": { "x": 8, "y": 7, "w": 16, "h": 6 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "maxDataPoints": 30,
+        "targets": [
+          { "expr": "sum(count_over_time({job=\"nginx\"} |= \" 200 \" [5m]))", "legendFormat": "200 OK", "refId": "A" },
+          { "expr": "sum(count_over_time({job=\"nginx\"} |= \" 404 \" [5m]))", "legendFormat": "404 Not Found", "refId": "B" },
+          { "expr": "sum(count_over_time({job=\"nginx\"} |= \" 403 \" [5m]))", "legendFormat": "403 Forbidden", "refId": "C" }
+        ],
+        "fieldConfig": {
+          "defaults": { 
+            "custom": { "fillOpacity": 10, "lineWidth": 2, "spanNulls": true, "showPoints": "never" }, 
+            "unit": "short",
+            "noValue": "0"
+          },
+          "overrides": [
+            { "matcher": { "id": "byName", "options": "200 OK" }, "properties": [{ "id": "color", "value": { "fixedColor": "#37872D", "mode": "fixed" } }] },
+            { "matcher": { "id": "byName", "options": "404 Not Found" }, "properties": [{ "id": "color", "value": { "fixedColor": "#FF9830", "mode": "fixed" } }] },
+            { "matcher": { "id": "byName", "options": "403 Forbidden" }, "properties": [{ "id": "color", "value": { "fixedColor": "#F2495C", "mode": "fixed" } }] }
+          ]
+        },
+        "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+      },
+      {
+        "id": 12, "type": "text", "gridPos": { "x": 0, "y": 13, "w": 24, "h": 1 }, "transparent": true,
+        "options": { "mode": "html", "content": "<div style=\"border-bottom:1px solid #333\"><span style=\"color:#777;font-size:10px;letter-spacing:2px\">◈ RECENT ACTIVITY</span></div>" }
+      },
+      {
+        "id": 13, "type": "logs", "title": "Suspicious Requests",
+        "description": "Recent malicious probe attempts",
+        "gridPos": { "x": 0, "y": 14, "w": 12, "h": 8 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [{ "expr": "{job=\"nginx\"} |~ \"\\\\.env|\\\\.git|wp-|phpmyadmin|pma|xmlrpc\"", "refId": "A", "maxLines": 25 }],
+        "options": { "showTime": true, "sortOrder": "Descending", "wrapLogMessage": false, "enableLogDetails": true, "dedupStrategy": "exact" }
+      },
+      {
+        "id": 14, "type": "logs", "title": "Auth & Bans",
+        "description": "Authentication events and IP bans",
+        "gridPos": { "x": 12, "y": 14, "w": 12, "h": 8 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [{ "expr": "{job=~\"authelia|fail2ban\"}", "refId": "A", "maxLines": 25 }],
+        "options": { "showTime": true, "sortOrder": "Descending", "wrapLogMessage": false, "enableLogDetails": true, "dedupStrategy": "exact" }
+      },
+      {
+        "id": 15, "type": "text", "gridPos": { "x": 0, "y": 22, "w": 24, "h": 1 }, "transparent": true,
+        "options": { "mode": "html", "content": "<div style=\"border-bottom:1px solid #333\"><span style=\"color:#777;font-size:10px;letter-spacing:2px\">◈ DETAILED LOGS</span></div>" }
+      },
+      {
+        "id": 16, "type": "logs", "title": "All Nginx Traffic",
+        "gridPos": { "x": 0, "y": 23, "w": 24, "h": 8 },
+        "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+        "targets": [{ "expr": "{job=\"nginx\"}", "refId": "A", "maxLines": 50 }],
+        "options": { "showTime": true, "sortOrder": "Descending", "wrapLogMessage": false, "enableLogDetails": true, "dedupStrategy": "exact" }
+      },
+      {
+        "id": 17, "type": "text", "gridPos": { "x": 0, "y": 31, "w": 24, "h": 1 }, "transparent": true,
+        "options": { "mode": "html", "content": "<div style=\"text-align:center;color:#444;font-size:9px;padding:5px\">Security Command Center v6 • 2m refresh • Enhanced Details</div>" }
+      }
+    ]
+  },
+  "overwrite": true
+}
